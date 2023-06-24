@@ -104,3 +104,62 @@ void RLA_8(uint8_t *reg, flags *f)
     f->c = *reg >> 7;
     *reg = res;
 }
+
+/*==================================
+ * RRCA:
+ *  Rotate Right
+ =================================*/
+void RRCA_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg >> 1 | *reg << 7;
+    f->c = *reg & 0x1;
+    *reg = res;
+}
+
+/*==================================
+ * RRA:
+ *  Rotate Reft through carry
+ =================================*/
+void RRA_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg >> 1 | f->c << 7;
+    f->c = *reg & 0x1;
+    *reg = res;
+}
+
+/*==================================
+ * ADD:
+ *  r1 = r1 + r2
+ =================================*/
+void ADD_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 + *r2;
+    f->z = res == 0x00;
+    f->n = 0;
+    f->h = (0x10 & (*r1 & 0xf + *r2 & 0xf)) >> 4;
+    f->c = res < r1;
+    *r1 = res;
+}
+
+void ADD_16(uint16_t *r1, uint16_t *r2, flags *f)
+{
+    uint16_t res = *r1 + *r2;
+    f->n = 0;
+    f->h = (0x10 & (*r1 & 0xf + *r2 & 0xf)) >> 4;
+    f->c = res < r1;
+    r1 = res;
+}
+
+/*==================================
+ * JR:
+ *  Conditional Relative jump
+ *  If mask NXOR flags; do
+ *  PC = PC + imm
+ *
+ * NOTE - mask[0:3] unused
+ =================================*/
+void JR(uint16_t *PC, uint8_t imm, uint8_t mask, uint8_t f){
+    if(~mask | f){
+        *PC = *PC + (int8_t)imm;
+    }
+}
