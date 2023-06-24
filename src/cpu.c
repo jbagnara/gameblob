@@ -1,6 +1,16 @@
 #include <cpu.h>
 #include <op.h>
 
+/*================================== 
+ * Implements Sharp LR35902
+ * instruction set
+ * 
+ * NOTE - I've separated the
+ * different LD mneumonics into
+ * separate op names MOV, LRD,
+ * and STR.
+ *=================================*/
+
 uint8_t imm_16(uint8_t* mem, uint16_t PC) {
     return mem[PC++] | mem[PC++] << 8;
 }
