@@ -11,7 +11,7 @@
  *
  =================================*/
 typedef struct flags {
-    uint8_t dnc:4;
+    uint8_t dnc:4;  // unused
     uint8_t c:1;    // carry
     uint8_t h:1;    // half carry
     uint8_t n:1;    // substraction
@@ -37,12 +37,4 @@ typedef struct regs {
     uint16_t SP;
     uint16_t PC;
 } regs;
-
-/*==================================
- *
- * Lower 8 bits of AF register
- * represent flags where bits [0:3]
- * are unused
- *
- =================================*/
 #endif
