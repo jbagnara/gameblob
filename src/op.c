@@ -53,7 +53,7 @@ void INC_8(uint8_t *reg, flags f)
     uint8_t res = *reg + 1;
     f.z = res == 0;
     f.n = 0;
-    f.h = (0x10 & (op1 & 0xf + op2 & 0xf)) >> 4;
+    f.h = (0x10 & (*reg & 0xf + 0x1)) >> 4;
     *reg = res;
 }
 
