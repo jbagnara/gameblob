@@ -55,6 +55,7 @@ void INC_8(uint8_t *reg, flags f)
     f.n = 0;
     f.h = (0x10 & (op1 & 0xf + op2 & 0xf)) >> 4;
     *reg = res;
+}
 
 void INC_16(uint8_t *reg)
 {
