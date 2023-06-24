@@ -24,11 +24,15 @@ int exec(regs* r, uint8_t* mem)
     uint8_t op = mem[r->PC++];
 
     switch(op){
-        case 0x00: break;
-        case 0x01: MOV_16(&r->BC, imm_16(mem, &r->PC)); break;
-        case 0x02: STR_16(&mem[r->BC], r->A); break;
-        case 0x03: INC_16(&r->BC); break;
-        case 0x04: INC_8(&r->B, &r->F); break;
+        case 0x00:                                              break;
+        case 0x01: MOV_16(&r->BC, imm_16(mem, &r->PC));         break;
+        case 0x02: STR_8(&mem[r->BC], r->A);                    break;
+        case 0x03: INC_16(&r->BC);                              break;
+        case 0x04: INC_8(&r->B, &r->F);                         break;
+        case 0x05: DEC_8(&r->B, &r->F);                         break;
+        case 0x06: MOV_8(&r->B, imm_8(mem, &r->PC));            break;
+        case 0x07: RLCA_8(&r->A, &r->F);                        break;
+        case 0x08: STR_16(&mem[imm_16(mem, &r->PC)], r->SP);    break;
     }
     return 0;
 }

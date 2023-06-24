@@ -194,6 +194,28 @@ int main()
     e_PC = 0x1;
     e_mem[0x0] = 0x04;
     check();
+
+/*===========================
+ * TEST 0x08
+ *=========================*/
+    test_case = 0x08;
+
+    reset(m);
+    m.mem[0] = 0x08;
+    m.mem[1] = 0x15;
+    m.mem[2] = 0xca;
+    m.cpu.SP = 0xbeef;
+    exec(&m.cpu, m.mem);
+
+    e_mem[0] = 
+    e_PC = 0x3;
+    e_SP = 0xbeef;
+    e_mem[0] = 0x08;
+    e_mem[1] = 0x15;
+    e_mem[2] = 0xca;
+    e_mem[0xca15] = 0xef;
+    e_mem[0xca16] = 0xbe;
+    check();
 }
 
 
