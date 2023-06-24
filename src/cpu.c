@@ -11,22 +11,24 @@
  * and STR.
  *=================================*/
 
-uint8_t imm_16(uint8_t* mem, uint16_t PC) {
-    return mem[PC++] | mem[PC++] << 8;
+uint16_t imm_16(uint8_t *mem, uint16_t *PC) {
+    return mem[(*PC)++] | mem[(*PC)++] << 8;
 }
 
-uint8_t imm_8(uint8_t* mem, uint16_t PC) {
-    return mem[PC++];
+uint8_t imm_8(uint8_t* mem, uint16_t *PC) {
+    return mem[(*PC)++];
 }
 
-int exec(cpu r, uint8_t* mem)
+int exec(regs* r, uint8_t* mem)
 {
-    op = mem[regs.PC++]
+    uint8_t op = mem[r->PC++];
 
     switch(op){
         case 0x00: break;
-        case 0x01: MOV_16(&r.BC, imm_16(mem, r.PC));
-        case 0x02: STR_16(&mem[r.BC], r.A);
-        case 0x03: INC_16(&r.BC);
+        case 0x01: MOV_16(&r->BC, imm_16(mem, &r->PC)); break;
+        case 0x02: STR_16(&mem[r->BC], r->A); break;
+        case 0x03: INC_16(&r->BC); break;
+        case 0x04: INC_8(&r->B, &r->F); break;
     }
+    return 0;
 }

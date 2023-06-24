@@ -29,7 +29,7 @@ typedef struct flags {
 #define REG_FLAG(A, B) PAIR(A, B, flags);
 #define REG_PAIR(A, B) PAIR(A, B, uint8_t)
 
-typedef struct cpu {
+typedef struct regs {
     REG_FLAG(A, F);
     REG_PAIR(B, C);
     REG_PAIR(D, E);

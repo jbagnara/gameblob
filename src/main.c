@@ -1,4 +1,5 @@
 #include <machine.h>
+#include <cpu.h>
 
 int main()
 {
