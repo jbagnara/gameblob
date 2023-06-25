@@ -36,7 +36,7 @@ void reset()
     e_E = 0x00;
     e_H = 0x00;
     e_L = 0x00;
-    e_PC = 0x00;
+    e_PC = 0x01;
     e_SP = 0x00;
 }
 
@@ -125,221 +125,305 @@ int check()
 
 int main()
 {
+#define TEST(A) \
+    reset(m); \
+    test_case = 0x##A;
+
+#define SET_REG(A, B) \
+    m.cpu.A = B; \
+    e_##A = B;
+
+#define CHECK_REG(A, B) \
+    e_##A = B;
+
+#define SET_MEM(A, B) \
+    m.mem[A] = B; \
+    e_mem[A] = B;
+
+#define CHECK_MEM(A, B) \
+    e_mem[A] = B;
+
+#define EXEC exec(&m.cpu, m.mem);
+
+#define CHECK \
+    check();
+
+#define FOR(A, B, C) for(int FOR_ITR = A; FOR_ITR <= B; FOR_ITR++) C
+
+    reset(m);
 /*===========================
  * TEST 0x01
  *=========================*/
-    test_case = 0x01;
+    TEST(01)
 
-    reset(m);
-    m.mem[0] = 0x01;
-    m.mem[1] = 0x0a;
-    m.mem[2] = 0x0b;
-    m.cpu.PC = 0x0;
-    exec(&m.cpu, m.mem);
-    
-    e_B = 0x0b;
-    e_C = 0x0a;
-    e_PC = 0x3;
-    e_mem[0] = 0x01;
-    e_mem[1] = 0x0a;
-    e_mem[2] = 0x0b;
-    check();
+    SET_MEM(0, 0x01)
+    SET_MEM(1, 0x0a)
+    SET_MEM(2, 0x0b)
+    CHECK_REG(B, 0x0b)
+    CHECK_REG(C, 0x0a)
+    CHECK_REG(PC, 0x3)
+
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x02
  *=========================*/
-    test_case = 0x02;
+    TEST(02)
 
-    reset(m);
-    m.mem[0] = 0x02;
-    m.cpu.A = 0xbe;
-    m.cpu.BC = 0xca15;
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x02)
+    SET_REG(A, 0xbe)
+    SET_REG(B, 0xca)
+    SET_REG(C, 0x15)
+    CHECK_MEM(0, 0x02)
+    CHECK_MEM(0xca15, 0xbe)
 
-    e_A = 0xbe;
-    e_B = 0xca;
-    e_C = 0x15;
-    e_PC = 0x1;
-    e_mem[0x0] = 0x02;
-    e_mem[0xca15] = 0xbe;
-    check();
+    EXEC
+    CHECK
+    
 
 /*===========================
  * TEST 0x03
  *=========================*/
-    test_case = 0x03;
+    TEST(03)
 
-    reset(m);
-    m.mem[0] = 0x03;
-    m.cpu.BC = 0xca15;
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x03)
+    SET_REG(B, 0xca)
+    SET_REG(C, 0x15)
+    CHECK_REG(C, 0x16)
 
-    e_B = 0xca;
-    e_C = 0x16;
-    e_PC = 0x1;
-    e_mem[0x0] = 0x03;
-    check();
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x04
  *=========================*/
-    test_case = 0x04;
+    TEST(04)
 
-    reset(m);
-    m.mem[0] = 0x04;
-    m.cpu.B = 0x46;
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x04)
+    SET_REG(B, 0x46)
+    CHECK_REG(B, 0x47)
 
-    e_B = 0x47;
-    e_PC = 0x1;
-    e_mem[0x0] = 0x04;
-    check();
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x08
  *=========================*/
-    test_case = 0x08;
+    TEST(08)
 
-    reset(m);
-    m.mem[0] = 0x08;
-    m.mem[1] = 0x15;
-    m.mem[2] = 0xca;
-    m.cpu.SP = 0xbeef;
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x08)
+    SET_MEM(1, 0x15)
+    SET_MEM(2, 0xca)
+    SET_REG(SP, 0xbeef)
+    CHECK_REG(PC, 3)
+    CHECK_MEM(0xca15, 0xef)
+    CHECK_MEM(0xca16, 0xbe)
 
-    e_mem[0] = 
-    e_PC = 0x3;
-    e_SP = 0xbeef;
-    e_mem[0] = 0x08;
-    e_mem[1] = 0x15;
-    e_mem[2] = 0xca;
-    e_mem[0xca15] = 0xef;
-    e_mem[0xca16] = 0xbe;
-    check();
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x27a
  *=========================*/
-    test_case = 0x27a;
+    TEST(27a)
 
-    reset(m);
-    m.mem[0] = 0x80;
-    m.mem[1] = 0x27;
-    m.cpu.A = 0x99;
-    m.cpu.B = 0x99;
-    exec(&m.cpu, m.mem);
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x80)
+    SET_MEM(1, 0x27)
+    SET_REG(A, 0x99)
+    SET_REG(B, 0x99)
+    CHECK_REG(A, 0x98)
+    CHECK_REG(F, 0x10)
+    CHECK_REG(PC, 0x2)
 
-    e_PC = 0x2;
-    e_mem[0] = 0x80;
-    e_mem[1] = 0x27;
-    e_A = 0x98;
-    e_B = 0x99;
-    e_F = 0x10;
-    check();
+    EXEC
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x27b
  *=========================*/
-    test_case = 0x27b;
+    TEST(27b)
 
-    reset(m);
-    m.mem[0] = 0x80;
-    m.mem[1] = 0x27;
-    m.cpu.A = 0x47;
-    m.cpu.B = 0x25;
-    exec(&m.cpu, m.mem);
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x80)
+    SET_MEM(1, 0x27)
+    SET_REG(A, 0x47)
+    SET_REG(B, 0x25)
+    CHECK_REG(A, 0x72)
+    CHECK_REG(PC, 0x2)
 
-    e_PC = 0x2;
-    e_mem[0] = 0x80;
-    e_mem[1] = 0x27;
-    e_A = 0x72;
-    e_B = 0x25;
-    check();
+    EXEC
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x27c
  *=========================*/
-    test_case = 0x27c;
+    TEST(27c)
 
-    reset(m);
-    m.mem[0] = 0x80;
-    m.mem[1] = 0x27;
-    m.cpu.A = 0x47;
-    m.cpu.B = 0x75;
-    exec(&m.cpu, m.mem);
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x80)
+    SET_MEM(1, 0x27)
+    SET_REG(A, 0x47)
+    SET_REG(B, 0x75)
+    CHECK_REG(A, 0x22)
+    CHECK_REG(F, 0x10)
+    CHECK_REG(PC, 0x2)
 
-    e_PC = 0x2;
-    e_mem[0] = 0x80;
-    e_mem[1] = 0x27;
-    e_A = 0x22;
-    e_B = 0x75;
-    e_F = 0x10;
-    check();
+    EXEC
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x27d
  *=========================*/
-    test_case = 0x27d;
+    TEST(27d)
 
-    reset(m);
-    m.mem[0] = 0x90;
-    m.mem[1] = 0x27;
-    m.cpu.A = 0x98;
-    m.cpu.B = 0x99;
-    exec(&m.cpu, m.mem);
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x90)
+    SET_MEM(1, 0x27)
+    SET_REG(A, 0x98)
+    SET_REG(B, 0x99)
+    CHECK_REG(A, 0x99)
+    CHECK_REG(B, 0x99)
+    CHECK_REG(F, 0x50)
+    CHECK_REG(PC, 0x2)
 
-    e_PC = 0x2;
-    e_mem[0] = 0x90;
-    e_mem[1] = 0x27;
-    e_A = 0x99;
-    e_B = 0x99;
-    e_F = 0x50;
-    check();
+    EXEC
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x27e
  *=========================*/
-    test_case = 0x27e;
+    TEST(27e)
 
-    reset(m);
-    m.mem[0] = 0x90;
-    m.mem[1] = 0x27;
-    m.cpu.A = 0x47;
-    m.cpu.B = 0x25;
-    exec(&m.cpu, m.mem);
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x90)
+    SET_MEM(1, 0x27)
+    SET_REG(A, 0x47)
+    SET_REG(B, 0x25)
+    CHECK_REG(A, 0x22)
+    CHECK_REG(F, 0x40)
+    CHECK_REG(PC, 0x2)
 
-    e_PC = 0x2;
-    e_mem[0] = 0x90;
-    e_mem[1] = 0x27;
-    e_A = 0x22;
-    e_B = 0x25;
-    e_F = 0x40;
-    check();
+    EXEC
+    EXEC
+    CHECK
 
 /*===========================
  * TEST 0x27f
  *=========================*/
-    test_case = 0x27f;
+    TEST(27f)
 
-    reset(m);
-    m.mem[0] = 0x90;
-    m.mem[1] = 0x27;
-    m.cpu.A = 0x43;
-    m.cpu.B = 0x25;
-    exec(&m.cpu, m.mem);
-    exec(&m.cpu, m.mem);
+    SET_MEM(0, 0x90)
+    SET_MEM(1, 0x27)
+    SET_REG(A, 0x43)
+    SET_REG(B, 0x25)
+    CHECK_REG(A, 0x18)
+    CHECK_REG(F, 0x40)
+    CHECK_REG(PC, 0x2)
 
-    e_PC = 0x2;
-    e_mem[0] = 0x90;
-    e_mem[1] = 0x27;
-    e_A = 0x18;
-    e_B = 0x25;
-    e_F = 0x40;
-    check();
+    EXEC
+    EXEC
+    CHECK
+
+/*===========================
+ * TEST 0x40-0x75, 0x77-0x7f
+ *=========================*/
+#define TEST_MOV(OP, A, B) \
+    TEST(OP) \
+    SET_MEM(0, 0x##OP) \
+    SET_REG(A, 0x36) \
+    SET_REG(B, 0x82) \
+    CHECK_REG(A, 0x82) \
+    EXEC \
+    CHECK
+
+#define TEST_LDR(OP, A, B, C) \
+    TEST(OP) \
+    SET_MEM(0, 0x##OP) \
+    SET_MEM(0xba0c, 0x82) \
+    SET_REG(B, 0xba) \
+    SET_REG(C, 0x0c) \
+    CHECK_REG(A, 0x82) \
+    EXEC \
+    CHECK
+
+#define TEST_STR_D1(OP, A, B, C) \
+    TEST(OP) \
+    SET_MEM(0, 0x##OP) \
+    SET_REG(A, 0xf1) \
+    SET_REG(B, 0x29) \
+    SET_REG(C, 0x82) \
+    CHECK_MEM(0xf129, 0x82) \
+    EXEC \
+    CHECK
+
+#define TEST_STR_D2(OP, A, B, C) \
+    TEST(OP) \
+    SET_MEM(0, 0x##OP) \
+    SET_REG(A, 0x82) \
+    SET_REG(B, 0x29) \
+    SET_REG(C, 0x82) \
+    CHECK_MEM(0x8229, 0x82) \
+    EXEC \
+    CHECK
+
+#define TEST_STR_D3(OP, A, B, C) \
+    TEST(OP) \
+    SET_MEM(0, 0x##OP) \
+    SET_REG(A, 0xf1) \
+    SET_REG(B, 0x29) \
+    SET_REG(C, 0x29) \
+    CHECK_MEM(0xf129, 0x29) \
+    EXEC \
+    CHECK
+
+#define TEST_MOV_GROUP(X, R) \
+    TEST_MOV(X, R, B) \
+    TEST_MOV(X+1, R, C) \
+    TEST_MOV(X+2, R, D) \
+    TEST_MOV(X+3, R, E) \
+    TEST_MOV(X+4, R, H) \
+    TEST_MOV(X+5, R, L) \
+    TEST_LDR(X+6, R, H, L) \
+    TEST_MOV(X+7, R, A)
+
+    TEST_MOV_GROUP(40, B)
+    TEST_MOV_GROUP(48, C)
+    TEST_MOV_GROUP(50, D)
+    TEST_MOV_GROUP(58, E)
+    TEST_MOV_GROUP(60, H)
+    TEST_MOV_GROUP(68, L)
+    TEST_STR_D1(70, H, L, B)
+    TEST_STR_D1(71, H, L, C)
+    TEST_STR_D1(72, H, L, D)
+    TEST_STR_D1(73, H, L, E)
+    TEST_STR_D2(74, H, L, H)
+    TEST_STR_D3(75, H, L, L)
+    TEST_STR_D1(77, H, L, A)
+    TEST_MOV_GROUP(78, A)
+
+/*===========================
+ * TEST 0x80-0x87
+ *=========================*/
+#define ADD_FLAGS(OP1, OP2) \
+    (((uint8_t)(OP1 + OP2) < OP1) << 4 | \
+    (((OP1 & 0xf) + (OP2 & 0xf)) & 0x10) << 1 | \
+    ((uint8_t)(OP1 + OP2) == 0) << 7)
+#define TEST_ADD(OP, OP1, OP2, REG1, REG2) \
+    TEST(OP) \
+    SET_MEM(0, 0x##OP) \
+    SET_REG(REG1, OP1) \
+    SET_REG(REG2, OP2) \
+    CHECK_REG(REG1, OP1 + OP2) \
+    CHECK_REG(F, ADD_FLAGS(OP1, OP2)) \
+    EXEC \
+    CHECK
+
+    TEST_ADD(80, 0x32, 0x69, A, B)
+    TEST_ADD(81, 0xf0, 0x31, A, C)
+    TEST_ADD(82, 0x0b, 0x28, A, D)
+    TEST_ADD(83, 0x99, 0x99, A, E)
+    TEST_ADD(84, 0x00, 0x38, A, H)
+    TEST_ADD(85, 0xff, 0x01, A, L)
 }
 

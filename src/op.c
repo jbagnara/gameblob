@@ -21,14 +21,14 @@ void MOV_16(uint16_t *dst, uint16_t src)
  *  load value at addr src
  *  into dst
  =================================*/
-void LDR_8(uint8_t *dst, uint8_t src)
+void LDR_8(uint8_t *dst, uint8_t *src)
 {
-    *dst = src;
+    *dst = *src;
 }
 
-void LDR_16(uint16_t *dst, uint16_t src)
+void LDR_16(uint16_t *dst, uint16_t* src)
 {
-    *dst = src;
+    *dst = *src;
 }
 
 /*==================================
@@ -130,6 +130,17 @@ void RRA_8(uint8_t *reg, flags *f)
 }
 
 /*==================================
+ CPL:
+ *  bitwise negate
+ =================================*/
+void CPL(uint8_t *reg, flags *f)
+{
+    *reg = ~*reg;
+    f->n = 1;
+    f->h = 1;
+}
+
+/*==================================
  * ADD:
  *  r1 = r1 + r2
  =================================*/
@@ -146,6 +157,29 @@ void ADD_8(uint8_t *r1, uint8_t *r2, flags *f)
 void ADD_16(uint16_t *r1, uint16_t *r2, flags *f)
 {
     uint16_t res = *r1 + *r2;
+    f->n = 0;
+    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
+    f->c = res < *r1;
+    *r1 = res;
+}
+
+/*==================================
+ * ADC:
+ *  r1 = r1 + r2 + c
+ =================================*/
+void ADC_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 + *r2 + f->c;
+    f->z = res == 0x00;
+    f->n = 0;
+    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
+    f->c = res < *r1;
+    *r1 = res;
+}
+
+void ADC_16(uint16_t *r1, uint16_t *r2, flags *f)
+{
+    uint16_t res = *r1 + *r2 + f->c;
     f->n = 0;
     f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
     f->c = res < *r1;
@@ -218,4 +252,26 @@ void DAA(uint8_t *reg, flags *f)
     *reg = res;
     f->z = res == 0;
     f->h = 0;
+}
+
+/*==================================
+ * SCF:
+ *  set carry flag
+ =================================*/
+void SCF(flags *f)
+{
+    f->c = 1;
+    f->h = 0;
+    f->n = 0;
+}
+
+/*==================================
+ CCF:
+ *  flip carry flag
+ =================================*/
+void CCF(flags *f)
+{
+    f->c = ~(f->c);
+    f->h = 0;
+    f->n = 0;
 }
