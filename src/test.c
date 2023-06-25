@@ -216,6 +216,130 @@ int main()
     e_mem[0xca15] = 0xef;
     e_mem[0xca16] = 0xbe;
     check();
-}
 
+/*===========================
+ * TEST 0x27a
+ *=========================*/
+    test_case = 0x27a;
+
+    reset(m);
+    m.mem[0] = 0x80;
+    m.mem[1] = 0x27;
+    m.cpu.A = 0x99;
+    m.cpu.B = 0x99;
+    exec(&m.cpu, m.mem);
+    exec(&m.cpu, m.mem);
+
+    e_PC = 0x2;
+    e_mem[0] = 0x80;
+    e_mem[1] = 0x27;
+    e_A = 0x98;
+    e_B = 0x99;
+    e_F = 0x10;
+    check();
+
+/*===========================
+ * TEST 0x27b
+ *=========================*/
+    test_case = 0x27b;
+
+    reset(m);
+    m.mem[0] = 0x80;
+    m.mem[1] = 0x27;
+    m.cpu.A = 0x47;
+    m.cpu.B = 0x25;
+    exec(&m.cpu, m.mem);
+    exec(&m.cpu, m.mem);
+
+    e_PC = 0x2;
+    e_mem[0] = 0x80;
+    e_mem[1] = 0x27;
+    e_A = 0x72;
+    e_B = 0x25;
+    check();
+
+/*===========================
+ * TEST 0x27c
+ *=========================*/
+    test_case = 0x27c;
+
+    reset(m);
+    m.mem[0] = 0x80;
+    m.mem[1] = 0x27;
+    m.cpu.A = 0x47;
+    m.cpu.B = 0x75;
+    exec(&m.cpu, m.mem);
+    exec(&m.cpu, m.mem);
+
+    e_PC = 0x2;
+    e_mem[0] = 0x80;
+    e_mem[1] = 0x27;
+    e_A = 0x22;
+    e_B = 0x75;
+    e_F = 0x10;
+    check();
+
+/*===========================
+ * TEST 0x27d
+ *=========================*/
+    test_case = 0x27d;
+
+    reset(m);
+    m.mem[0] = 0x90;
+    m.mem[1] = 0x27;
+    m.cpu.A = 0x98;
+    m.cpu.B = 0x99;
+    exec(&m.cpu, m.mem);
+    exec(&m.cpu, m.mem);
+
+    e_PC = 0x2;
+    e_mem[0] = 0x90;
+    e_mem[1] = 0x27;
+    e_A = 0x99;
+    e_B = 0x99;
+    e_F = 0x50;
+    check();
+
+/*===========================
+ * TEST 0x27e
+ *=========================*/
+    test_case = 0x27e;
+
+    reset(m);
+    m.mem[0] = 0x90;
+    m.mem[1] = 0x27;
+    m.cpu.A = 0x47;
+    m.cpu.B = 0x25;
+    exec(&m.cpu, m.mem);
+    exec(&m.cpu, m.mem);
+
+    e_PC = 0x2;
+    e_mem[0] = 0x90;
+    e_mem[1] = 0x27;
+    e_A = 0x22;
+    e_B = 0x25;
+    e_F = 0x40;
+    check();
+
+/*===========================
+ * TEST 0x27f
+ *=========================*/
+    test_case = 0x27f;
+
+    reset(m);
+    m.mem[0] = 0x90;
+    m.mem[1] = 0x27;
+    m.cpu.A = 0x43;
+    m.cpu.B = 0x25;
+    exec(&m.cpu, m.mem);
+    exec(&m.cpu, m.mem);
+
+    e_PC = 0x2;
+    e_mem[0] = 0x90;
+    e_mem[1] = 0x27;
+    e_A = 0x18;
+    e_B = 0x25;
+    e_F = 0x40;
+    check();
+}
 

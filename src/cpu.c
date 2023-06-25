@@ -34,7 +34,7 @@ int exec(regs* r, uint8_t* mem)
         case 0x0c: INC_8(&r->C, &r->F);                 break;
         case 0x0d: DEC_8(&r->C, &r->F);                 break;
         case 0x0e: MOV_8(&r->C, IMM_8);                 break;
-        case 0x0f: RRCA(&r->A, &r->F);                  break;
+        case 0x0f: RRCA_8(&r->A, &r->F);                break;
 
         case 0x10: break; //TODO low power standby mode
         case 0x11: MOV_16(&r->DE, IMM_16);              break;
@@ -51,7 +51,20 @@ int exec(regs* r, uint8_t* mem)
         case 0x1c: INC_8(&r->E, &r->F);                 break;
         case 0x1d: DEC_8(&r->E, &r->F);                 break;
         case 0x1e: MOV_8(&r->E, IMM_8);                 break;
-        case 0x0f: RRA(&r->A, &r->F);                  break;
+        case 0x1f: RRA_8(&r->A, &r->F);                 break;
+
+        case 0x20: JR(&r->PC, IMM_8, 0xb0, r->F);       break;
+        case 0x21: MOV_16(&r->HL, IMM_16);              break;
+        case 0x22: STR_8(&mem[r->HL++], r->A);          break;
+        case 0x23: INC_16(&r->HL);                      break;
+        case 0x24: INC_8(&r->H, &r->F);                 break;
+        case 0x25: DEC_8(&r->H, &r->F);                 break;
+        case 0x26: MOV_8(&r->H, IMM_8);                 break;
+        case 0x27: DAA(&r->A, &r->F);                   break;
+
+        case 0x80: ADD_8(&r->A, &r->B, &r->F);          break;
+
+        case 0x90: SUB_8(&r->A, &r->B, &r->F);          break;
     }
     return 0;
 }

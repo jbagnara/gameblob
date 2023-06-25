@@ -1,5 +1,7 @@
 #include <cpu.h>
 
+#define printh(A) printf("0x%x\n", A)
+
 /*==================================
  * MOV:
  *  Move src into dst
@@ -53,7 +55,7 @@ void INC_8(uint8_t *reg, flags *f)
     uint8_t res = *reg + 1;
     f->z = res == 0;
     f->n = 0;
-    f->h = (0x10 & (*reg & 0xf + 0x1)) >> 4;
+    f->h = (0x10 & ((*reg & 0xf) + 0x1)) >> 4;
     *reg = res;
 }
 
@@ -72,7 +74,7 @@ void DEC_8(uint8_t *reg, flags *f)
     uint8_t res = *reg - 1;
     f->z = res == 0;
     f->n = 1;
-    f->h = (0x10 & (*reg & 0xf - 0x1)) >> 4;
+    f->h = (0x10 & ((*reg & 0xf) - 0x1)) >> 4;
     *reg = res;
 }
 
@@ -136,8 +138,8 @@ void ADD_8(uint8_t *r1, uint8_t *r2, flags *f)
     uint8_t res = *r1 + *r2;
     f->z = res == 0x00;
     f->n = 0;
-    f->h = (0x10 & (*r1 & 0xf + *r2 & 0xf)) >> 4;
-    f->c = res < r1;
+    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
+    f->c = res < *r1;
     *r1 = res;
 }
 
@@ -145,9 +147,32 @@ void ADD_16(uint16_t *r1, uint16_t *r2, flags *f)
 {
     uint16_t res = *r1 + *r2;
     f->n = 0;
-    f->h = (0x10 & (*r1 & 0xf + *r2 & 0xf)) >> 4;
-    f->c = res < r1;
-    r1 = res;
+    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
+    f->c = res < *r1;
+    *r1 = res;
+}
+
+/*==================================
+ * SUB:
+ *  r1 = r1 - r2
+ =================================*/
+void SUB_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 - *r2;
+    f->z = res == 0x00;
+    f->n = 1;
+    f->h = (0x10 & ((*r1 & 0xf) - (*r2 & 0xf))) >> 4;
+    f->c = res > *r1;
+    *r1 = res;
+}
+
+void SUB_16(uint16_t *r1, uint16_t *r2, flags *f)
+{
+    uint16_t res = *r1 - *r2;
+    f->n = 1;
+    f->h = (0x10 & ((*r1 & 0xf) - (*r2 & 0xf))) >> 4;
+    f->c = res > *r1;
+    *r1 = res;
 }
 
 /*==================================
@@ -158,8 +183,39 @@ void ADD_16(uint16_t *r1, uint16_t *r2, flags *f)
  *
  * NOTE - mask[0:3] unused
  =================================*/
-void JR(uint16_t *PC, uint8_t imm, uint8_t mask, uint8_t f){
+void JR(uint16_t *PC, uint8_t imm, uint8_t mask, uint8_t f)
+{
     if(~mask | f){
         *PC = *PC + (int8_t)imm;
     }
+}
+
+/*==================================
+ * DDA:
+ *  BCD Decimal Adjust
+ *  Retroactively converts previous
+ *  ADD/SUB op into BCD ADD/SUB
+ *  using N, H, C flags
+ *================================*/
+void DAA(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg;
+    if(f->n){
+        if(f->c) res -= 0x60; 
+        if(f->h) res -= 0x6;
+        if((res & 0xf) > 0x9) res -= 0x6;
+        if(res > 0x99) res += 0xa0;
+
+        f->c |= res > *reg;
+    } else {
+        if(f->c) res += 0x60; 
+        if(f->h) res += 0x6;
+        if((res & 0xf) > 0x9) res += 0x6;
+        if(res > 0x99) res -= 0xa0;
+
+        f->c |= res < *reg;
+    }
+    *reg = res;
+    f->z = res == 0;
+    f->h = 0;
 }
