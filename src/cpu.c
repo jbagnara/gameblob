@@ -146,22 +146,22 @@ int exec(regs* r, uint8_t* mem)
         case 0x6e: LDR_8(&r->L, &mem[r->HL]);           break;
         case 0x6f: MOV_8(&r->L, r->A);                  break;
 
-        case 0x70: STR_8(&mem[r->HL], r->B);           break;
-        case 0x71: STR_8(&mem[r->HL], r->C);           break;
-        case 0x72: STR_8(&mem[r->HL], r->D);           break;
-        case 0x73: STR_8(&mem[r->HL], r->E);           break;
-        case 0x74: STR_8(&mem[r->HL], r->H);           break;
-        case 0x75: STR_8(&mem[r->HL], r->L);           break;
+        case 0x70: STR_8(&mem[r->HL], r->B);            break;
+        case 0x71: STR_8(&mem[r->HL], r->C);            break;
+        case 0x72: STR_8(&mem[r->HL], r->D);            break;
+        case 0x73: STR_8(&mem[r->HL], r->E);            break;
+        case 0x74: STR_8(&mem[r->HL], r->H);            break;
+        case 0x75: STR_8(&mem[r->HL], r->L);            break;
         case 0x76: break;                               //TODO HALT
-        case 0x77: STR_8(&mem[r->HL], r->A);           break;
-        case 0x78: MOV_8(&r->A, r->B);                 break;
-        case 0x79: MOV_8(&r->A, r->C);                 break;
-        case 0x7a: MOV_8(&r->A, r->D);                 break;
-        case 0x7b: MOV_8(&r->A, r->E);                 break;
-        case 0x7c: MOV_8(&r->A, r->H);                 break;
-        case 0x7d: MOV_8(&r->A, r->L);                 break;
+        case 0x77: STR_8(&mem[r->HL], r->A);            break;
+        case 0x78: MOV_8(&r->A, r->B);                  break;
+        case 0x79: MOV_8(&r->A, r->C);                  break;
+        case 0x7a: MOV_8(&r->A, r->D);                  break;
+        case 0x7b: MOV_8(&r->A, r->E);                  break;
+        case 0x7c: MOV_8(&r->A, r->H);                  break;
+        case 0x7d: MOV_8(&r->A, r->L);                  break;
         case 0x7e: LDR_8(&r->A, &mem[r->HL]);           break;
-        case 0x7f: MOV_8(&r->A, r->A);                 break;
+        case 0x7f: MOV_8(&r->A, r->A);                  break;
 
         case 0x80: ADD_8(&r->A, &r->B, &r->F);          break;
         case 0x81: ADD_8(&r->A, &r->C, &r->F);          break;
