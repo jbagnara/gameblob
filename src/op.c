@@ -1,4 +1,5 @@
 #include <cpu.h>
+#include <stdint.h>
 
 #define printh(A) printf("0x%x\n", A)
 
@@ -26,9 +27,21 @@ void LDR_8(uint8_t *dst, uint8_t *src)
     *dst = *src;
 }
 
-void LDR_16(uint16_t *dst, uint16_t* src)
+void LDR_16(uint16_t *dst, uint16_t *src)
 {
     *dst = *src;
+}
+
+void POP_16(uint16_t *dst, uint16_t *src, uint16_t* SP)
+{
+    *dst = *src;
+    *SP = *SP + 2;
+}
+
+void PUSH_16(uint16_t *src, uint16_t *dst, uint16_t* SP)
+{
+    *dst = *src;
+    *SP = *SP - 2;
 }
 
 /*==================================
@@ -59,7 +72,7 @@ void INC_8(uint8_t *reg, flags *f)
     *reg = res;
 }
 
-void INC_16(uint8_t *reg)
+void INC_16(uint16_t *reg)
 {
     uint16_t res = *reg + 1;
     *reg = res;
@@ -78,7 +91,7 @@ void DEC_8(uint8_t *reg, flags *f)
     *reg = res;
 }
 
-void DEC_16(uint8_t *reg)
+void DEC_16(uint16_t *reg)
 {
     uint16_t res = *reg - 1;
     *reg = res;
@@ -172,7 +185,7 @@ void ADC_8(uint8_t *r1, uint8_t *r2, flags *f)
     uint8_t res = *r1 + *r2 + f->c;
     f->z = res == 0x00;
     f->n = 0;
-    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
+    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf) + f->c)) >> 4;
     f->c = res < *r1;
     *r1 = res;
 }
@@ -181,7 +194,7 @@ void ADC_16(uint16_t *r1, uint16_t *r2, flags *f)
 {
     uint16_t res = *r1 + *r2 + f->c;
     f->n = 0;
-    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf))) >> 4;
+    f->h = (0x10 & ((*r1 & 0xf) + (*r2 & 0xf) + f->c)) >> 4;
     f->c = res < *r1;
     *r1 = res;
 }
@@ -209,18 +222,121 @@ void SUB_16(uint16_t *r1, uint16_t *r2, flags *f)
     *r1 = res;
 }
 
+void SBC_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 - *r2 - f->c;
+    f->z = res == 0x00;
+    f->n = 1;
+    f->h = (0x10 & ((*r1 & 0xf) - (*r2 & 0xf) - f->c)) >> 4;
+    f->c = res > *r1;
+    *r1 = res;
+}
+
+void SBC_16(uint16_t *r1, uint16_t *r2, flags *f)
+{
+    uint16_t res = *r1 - *r2 - f->c;
+    f->n = 1;
+    f->h = (0x10 & ((*r1 & 0xf) - (*r2 & 0xf) - f->c)) >> 4;
+    f->c = res > *r1;
+    *r1 = res;
+}
+
+void CP_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 - *r2;
+    f->z = res == 0x00;
+    f->n = 1;
+    f->h = (0x10 & ((*r1 & 0xf) - (*r2 & 0xf))) >> 4;
+    f->c = res > *r1;
+}
+
+void AND_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 & *r2;
+    f->z = res == 0x00;
+    f->n = 0;
+    f->h = 1;
+    f->c = 0;
+    *r1 = res;
+}
+
+void XOR_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 ^ *r2;
+    f->z = res == 0x00;
+    f->n = 0;
+    f->h = 0;
+    f->c = 0;
+    *r1 = res;
+}
+
+void OR_8(uint8_t *r1, uint8_t *r2, flags *f)
+{
+    uint8_t res = *r1 | *r2;
+    f->z = res == 0x00;
+    f->n = 0;
+    f->h = 0;
+    f->c = 0;
+    *r1 = res;
+}
+
+/*==================================
+ * JP:
+ *  Conditional jump
+ *
+ =================================*/
+void JR(uint16_t *PC, uint16_t imm, uint8_t mask, flags *f)
+{
+    if(~mask | *((uint8_t*)f)){
+        *PC = imm;
+    }
+}
+
+/*==================================
+ * CALL:
+ *  Conditional call
+ *
+ =================================*/
+void CALL(uint16_t *PC, uint16_t *SP, uint16_t *stack, uint16_t imm, uint8_t mask, flags *f)
+{
+    if(~mask | *((uint8_t*)f)){
+        *SP = *SP - 2;
+        *stack = *PC;
+        *PC = imm;
+    }
+}
+
+void RST(uint16_t *PC, uint16_t *SP, uint16_t *stack, uint16_t imm)
+{
+    *SP = *SP - 2;
+    *stack = *PC;
+    *PC = imm;
+}
+
 /*==================================
  * JR:
  *  Conditional Relative jump
- *  If mask NXOR flags; do
- *  PC = PC + imm
  *
  * NOTE - mask[0:3] unused
  =================================*/
-void JR(uint16_t *PC, uint8_t imm, uint8_t mask, uint8_t f)
+void JR(uint16_t *PC, uint8_t imm, uint8_t mask, flags *f)
 {
-    if(~mask | f){
+    if(~mask | *((uint8_t*)f)){
         *PC = *PC + (int8_t)imm;
+    }
+}
+
+/*==================================
+ * JR:
+ *  Conditional return
+ *
+ * NOTE - mask[0:3] unused
+ =================================*/
+void RET(uint16_t *PC, uint16_t *SP, uint8_t mask, flags *f)
+{
+    if(~mask | *((uint8_t*)f)){
+        *PC = *SP;
+        *SP = *SP + 2;
     }
 }
 
