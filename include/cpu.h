@@ -36,5 +36,8 @@ typedef struct regs {
     REG_PAIR(H, L);
     uint16_t SP;
     uint16_t PC;
+    uint8_t IF;
+    uint8_t IE;
+    uint8_t IME;
 } regs;
 #endif

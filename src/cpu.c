@@ -1,5 +1,6 @@
 #include <cpu.h>
 #include <op.h>
+#include <stdio.h>
 
 /*================================== 
  * Implements Sharp LR35902
@@ -75,7 +76,7 @@ int exec(regs* r, uint8_t* mem)
         case 0x25: DEC_8(&r->H, &r->F);                                         break;
         case 0x26: MOV_8(&r->H, IMM_8);                                         break;
         case 0x27: DAA(&r->A, &r->F);                                           break;
-        case 0x28: JR(&r->PC, IMM_8, MASK_Z, r->F);                              break;
+        case 0x28: JR(&r->PC, IMM_8, MASK_Z, &r->F);                            break;
         case 0x29: ADD_16(&r->HL, &r->HL, &r->F);                               break;
         case 0x2a: LDR_8(&r->A, &mem[r->HL++]);                                 break;
         case 0x2b: DEC_16(&r->HL);                                              break;
@@ -84,7 +85,7 @@ int exec(regs* r, uint8_t* mem)
         case 0x2e: MOV_8(&r->L, IMM_8);                                         break;
         case 0x2f: CPL(&r->A, &r->F);                                           break;
 
-        case 0x30: JR(&r->PC, IMM_8, MASK_NC, r->F);                            break;
+        case 0x30: JR(&r->PC, IMM_8, MASK_NC, &r->F);                           break;
         case 0x31: MOV_16(&r->SP, IMM_16);                                      break;
         case 0x32: STR_8(&mem[r->HL--], r->A);                                  break;
         case 0x33: INC_16(&r->SP);                                              break;
@@ -92,7 +93,7 @@ int exec(regs* r, uint8_t* mem)
         case 0x35: DEC_8(&mem[r->HL], &r->F);                                   break;
         case 0x36: MOV_8(&mem[r->HL], IMM_8);                                   break;
         case 0x37: SCF(&r->F);                                                  break;
-        case 0x38: JR(&r->PC, IMM_8, MASK_C, r->F);                             break;
+        case 0x38: JR(&r->PC, IMM_8, MASK_C, &r->F);                            break;
         case 0x39: ADD_16(&r->HL, &r->SP, &r->F);                               break;
         case 0x3a: LDR_8(&r->A, &mem[r->HL--]);                                 break;
         case 0x3b: DEC_16(&r->SP);                                              break;
@@ -238,7 +239,7 @@ int exec(regs* r, uint8_t* mem)
         case 0xbf: CP_8(&r->A, &r->A, &r->F);                                   break;
 
         case 0xc0: RET(&r->PC, &r->SP, MASK_NZ, &r->F);                         break;
-        case 0xc1: POP(&r->BC, &mem[r->SP], &r->SP);                            break;
+        case 0xc1: POP_16(&r->BC, &mem[r->SP], &r->SP);                         break;
         case 0xc2: JP(&r->PC, IMM_16, MASK_NZ, &r->F);                          break;
         case 0xc3: JP(&r->PC, IMM_16, NONE, &r->F);                             break;
         case 0xc4: CALL(&r->PC, &r->SP, &mem[r->SP], IMM_16, MASK_NZ, &r->F);   break;
@@ -248,18 +249,56 @@ int exec(regs* r, uint8_t* mem)
         case 0xc8: RET(&r->PC, &r->SP, MASK_Z, &r->F);                          break;
         case 0xc9: RET(&r->PC, &r->SP, NONE, &r->F);                            break;
         case 0xca: JP(&r->PC, IMM_16, MASK_Z, &r->F);                           break;
-        case 0xcb: goto prefix_cb                                               break;
+        case 0xcb: goto prefix_cb;                                              break;
         case 0xcc: CALL(&r->PC, &r->SP, &mem[r->SP], IMM_16, MASK_Z, &r->F);    break;
         case 0xcd: CALL(&r->PC, &r->SP, &mem[r->SP], IMM_16, NONE, &r->F);      break;
         case 0xce: ADC_8(&r->A, &IMM_8, &r->F);                                 break;
         case 0xcf: RST(&r->PC, &r->SP, &mem[r->SP], 0x08);                      break;
 
+        case 0xd0: RET(&r->PC, &r->SP, MASK_NC, &r->F);                         break;
+        case 0xd1: POP_16(&r->DE, &mem[r->SP], &r->SP);                         break;
+        case 0xd2: JP(&r->PC, IMM_16, MASK_NC, &r->F);                          break;
+        case 0xd3: goto trap;                                                   break;
+        case 0xd4: CALL(&r->PC, &r->SP, &mem[r->SP], IMM_16, MASK_NC, &r->F);   break;
+        case 0xd5: PUSH_16(&r->DE, &mem[r->SP], &r->SP);                        break;
+        case 0xd6: SUB_8(&r->A, &IMM_8, &r->F);                                 break;
+        case 0xd7: RST(&r->PC, &r->SP, &mem[r->SP], 0x10);                      break;
+        case 0xd8: RET(&r->PC, &r->SP, MASK_C, &r->F);                          break;
+        case 0xd9: RETI(&r->PC, &r->SP, &r->IME);                               break;
+        case 0xda: JP(&r->PC, IMM_16, MASK_C, &r->F);                           break;
+        case 0xdb: goto trap;                                                   break;
+        case 0xdc: CALL(&r->PC, &r->SP, &mem[r->SP], IMM_16, MASK_C, &r->F);    break;
+        case 0xdd: goto trap;                                                   break;
+        case 0xde: SBC_8(&r->A, &IMM_8, &r->F);                                 break;
+        case 0xdf: RST(&r->PC, &r->SP, &mem[r->SP], 0x18);                      break;
+
+        case 0xe0: STR_8(&mem[ IMM_8 + 0xff00 ], &r->A);                        break;
+        case 0xe1: POP_16(&r->HL, &mem[r->SP], &r->SP);                         break;
+        case 0xe2: STR_8(&mem[r->C], &r->A);                                    break;
+        case 0xe3: goto trap;                                                   break;
+        case 0xe4: goto trap;                                                   break;
+        case 0xe5: PUSH_16(&r->HL, &mem[r->SP], &r->SP);                        break;
+        case 0xe6: AND_8(&r->A, &IMM_8, &r->F);                                 break;
+        case 0xe7: RST(&r->PC, &r->SP, &mem[r->SP], 0x20);                      break;
+        case 0xe8: ADD_16(&r->SP, &IMM_8, &r->F);                               break;
+        case 0xe9: JP(&r->PC, &mem[r->HL], NONE, &r->F);                        break;
+        case 0xea: STR_8(&mem[IMM_16], &r->A);                                  break;
+        case 0xeb: goto trap;                                                   break;
+        case 0xec: goto trap;                                                   break;
+        case 0xed: goto trap;                                                   break;
+        case 0xee: XOR_8(&r->A, &IMM_8, &r->F);                                 break;
+        case 0xef: RST(&r->PC, &r->SP, &mem[r->SP], 0x38);                      break;
+
     }
     return 0;
 
-    prefix_cb: op = mem[r->PC++];
+    prefix_cb: 
+    op = mem[r->PC++];
     switch(op) {
         default: printf("hit prefix!");
     }
     return 0;
+
+    trap: 
+    return 1;
 }

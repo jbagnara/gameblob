@@ -285,7 +285,7 @@ void OR_8(uint8_t *r1, uint8_t *r2, flags *f)
  *  Conditional jump
  *
  =================================*/
-void JR(uint16_t *PC, uint16_t imm, uint8_t mask, flags *f)
+void JP(uint16_t *PC, uint16_t imm, uint8_t mask, flags *f)
 {
     if(~mask | *((uint8_t*)f)){
         *PC = imm;
@@ -327,7 +327,7 @@ void JR(uint16_t *PC, uint8_t imm, uint8_t mask, flags *f)
 }
 
 /*==================================
- * JR:
+ * RET:
  *  Conditional return
  *
  * NOTE - mask[0:3] unused
@@ -338,6 +338,13 @@ void RET(uint16_t *PC, uint16_t *SP, uint8_t mask, flags *f)
         *PC = *SP;
         *SP = *SP + 2;
     }
+}
+
+void RETI(uint16_t *PC, uint16_t *SP, uint8_t *IME)
+{
+    *PC = *SP;
+    *SP = *SP + 2;
+    *IME = 1;
 }
 
 /*==================================
