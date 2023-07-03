@@ -133,7 +133,7 @@ void RRCA_8(uint8_t *reg, flags *f)
 
 /*==================================
  * RRA:
- *  Rotate Reft through carry
+ *  Rotate Right through carry
  =================================*/
 void RRA_8(uint8_t *reg, flags *f)
 {
@@ -398,3 +398,147 @@ void CCF(flags *f)
     f->h = 0;
     f->n = 0;
 }
+
+/*==================================
+ * RLC:
+ *  Rotate Left
+ =================================*/
+void RLC_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg << 1 | *reg >> 7;
+    f->c = *reg >> 7;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * RL:
+ *  Rotate Left through carry
+ =================================*/
+void RL_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg << 1 | f->c;
+    f->c = *reg >> 7;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * RRC:
+ *  Rotate Right
+ =================================*/
+void RRC_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg >> 1 | *reg << 7;
+    f->c = *reg & 0x1;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * RR:
+ *  Rotate Right through carry
+ =================================*/
+void RR_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg >> 1 | f->c << 7;
+    f->c = *reg & 0x1;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * SLA:
+ *  Shift left arithmetic 
+ =================================*/
+void SLA_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = *reg << 1;
+    f->c = *reg >> 7;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * SRA:
+ *  Shift right arithmetic 
+ =================================*/
+void SRA_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = (*reg >> 1) | *reg & 0x80;
+    f->c = 0;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * SRL:
+ *  Shift right logical 
+ =================================*/
+void SRL_8(uint8_t *reg, flags *f)
+{
+    uint8_t res = (*reg >> 1);
+    f->c = *reg >> 7;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * SWAP:
+ *  Swap low and high nibbles 
+ =================================*/
+void SWAP_8(uint8_t *reg, flags *f){
+    uint8_t res = (*reg << 4) | (*reg >> 4);
+    f->c = 0;
+    f->n = 0;
+    f->h = 0;
+    f->z = res == 0;
+    *reg = res;
+}
+
+/*==================================
+ * BIT:
+ *  Test bit n 
+ =================================*/
+void BIT(uint8_t *reg, uint8_t bit, flags *f)
+{
+    uint8_t res = (*reg >> bit) & 0x1;
+    f->n = 0;
+    f->h = 1;
+    f->z = res == 0;
+}
+
+/*==================================
+ * RES:
+ *  Reset bit n 
+ =================================*/
+void RES(uint8_t *reg, uint8_t bit)
+{
+    uint8_t res = *reg & ~(1 << bit);
+    *reg = res;
+}
+
+/*==================================
+ * SET:
+ *  Set bit n 
+ =================================*/
+void SET(uint8_t *reg, uint8_t bit)
+{
+    uint8_t res = *reg | (1 << bit);
+    *reg = res;
+}
+
