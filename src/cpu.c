@@ -29,7 +29,7 @@
     printf("PC: 0x%.4x\n", r->PC); \
     printf("(HL): 0x%.4x\n", mem[r->HL]);
 
-int exec(regs* r, uint8_t* mem)
+int exec(cpu_t* r, uint8_t* mem)
 {
     uint8_t op = mem[r->PC++];
 

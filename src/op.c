@@ -63,7 +63,7 @@ void STR_16(uint8_t *dst, uint16_t src)
  * INC:
  *  Increment reg by 1
  =================================*/
-void INC_8(uint8_t *reg, flags *f)
+void INC_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg + 1;
     f->z = res == 0;
@@ -82,7 +82,7 @@ void INC_16(uint16_t *reg)
  * DEC:
  *  decrement reg by 1
  =================================*/
-void DEC_8(uint8_t *reg, flags *f)
+void DEC_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg - 1;
     f->z = res == 0;
@@ -102,7 +102,7 @@ void DEC_16(uint16_t *reg)
  * RLCA:
  *  Rotate Left
  =================================*/
-void RLCA_8(uint8_t *reg, flags *f)
+void RLCA_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg << 1 | *reg >> 7;
     f->c = *reg >> 7;
@@ -113,7 +113,7 @@ void RLCA_8(uint8_t *reg, flags *f)
  * RLA:
  *  Rotate Left through carry
  =================================*/
-void RLA_8(uint8_t *reg, flags *f)
+void RLA_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg << 1 | f->c;
     f->c = *reg >> 7;
@@ -124,7 +124,7 @@ void RLA_8(uint8_t *reg, flags *f)
  * RRCA:
  *  Rotate Right
  =================================*/
-void RRCA_8(uint8_t *reg, flags *f)
+void RRCA_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg >> 1 | *reg << 7;
     f->c = *reg & 0x1;
@@ -135,7 +135,7 @@ void RRCA_8(uint8_t *reg, flags *f)
  * RRA:
  *  Rotate Right through carry
  =================================*/
-void RRA_8(uint8_t *reg, flags *f)
+void RRA_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg >> 1 | f->c << 7;
     f->c = *reg & 0x1;
@@ -146,7 +146,7 @@ void RRA_8(uint8_t *reg, flags *f)
  CPL:
  *  bitwise negate
  =================================*/
-void CPL(uint8_t *reg, flags *f)
+void CPL(uint8_t *reg, cpuflags_t *f)
 {
     *reg = ~*reg;
     f->n = 1;
@@ -157,7 +157,7 @@ void CPL(uint8_t *reg, flags *f)
  * ADD:
  *  r1 = r1 + r2
  =================================*/
-void ADD_8(uint8_t *r1, uint8_t *r2, flags *f)
+void ADD_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 + *r2;
     f->z = res == 0x00;
@@ -167,7 +167,7 @@ void ADD_8(uint8_t *r1, uint8_t *r2, flags *f)
     *r1 = res;
 }
 
-void ADD_16(uint16_t *r1, uint16_t *r2, flags *f)
+void ADD_16(uint16_t *r1, uint16_t *r2, cpuflags_t *f)
 {
     uint16_t res = *r1 + *r2;
     f->n = 0;
@@ -180,7 +180,7 @@ void ADD_16(uint16_t *r1, uint16_t *r2, flags *f)
  * ADC:
  *  r1 = r1 + r2 + c
  =================================*/
-void ADC_8(uint8_t *r1, uint8_t *r2, flags *f)
+void ADC_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 + *r2 + f->c;
     f->z = res == 0x00;
@@ -190,7 +190,7 @@ void ADC_8(uint8_t *r1, uint8_t *r2, flags *f)
     *r1 = res;
 }
 
-void ADC_16(uint16_t *r1, uint16_t *r2, flags *f)
+void ADC_16(uint16_t *r1, uint16_t *r2, cpuflags_t *f)
 {
     uint16_t res = *r1 + *r2 + f->c;
     f->n = 0;
@@ -203,7 +203,7 @@ void ADC_16(uint16_t *r1, uint16_t *r2, flags *f)
  * SUB:
  *  r1 = r1 - r2
  =================================*/
-void SUB_8(uint8_t *r1, uint8_t *r2, flags *f)
+void SUB_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 - *r2;
     f->z = res == 0x00;
@@ -213,7 +213,7 @@ void SUB_8(uint8_t *r1, uint8_t *r2, flags *f)
     *r1 = res;
 }
 
-void SUB_16(uint16_t *r1, uint16_t *r2, flags *f)
+void SUB_16(uint16_t *r1, uint16_t *r2, cpuflags_t *f)
 {
     uint16_t res = *r1 - *r2;
     f->n = 1;
@@ -222,7 +222,7 @@ void SUB_16(uint16_t *r1, uint16_t *r2, flags *f)
     *r1 = res;
 }
 
-void SBC_8(uint8_t *r1, uint8_t *r2, flags *f)
+void SBC_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 - *r2 - f->c;
     f->z = res == 0x00;
@@ -232,7 +232,7 @@ void SBC_8(uint8_t *r1, uint8_t *r2, flags *f)
     *r1 = res;
 }
 
-void SBC_16(uint16_t *r1, uint16_t *r2, flags *f)
+void SBC_16(uint16_t *r1, uint16_t *r2, cpuflags_t *f)
 {
     uint16_t res = *r1 - *r2 - f->c;
     f->n = 1;
@@ -241,7 +241,7 @@ void SBC_16(uint16_t *r1, uint16_t *r2, flags *f)
     *r1 = res;
 }
 
-void CP_8(uint8_t *r1, uint8_t *r2, flags *f)
+void CP_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 - *r2;
     f->z = res == 0x00;
@@ -250,7 +250,7 @@ void CP_8(uint8_t *r1, uint8_t *r2, flags *f)
     f->c = res > *r1;
 }
 
-void AND_8(uint8_t *r1, uint8_t *r2, flags *f)
+void AND_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 & *r2;
     f->z = res == 0x00;
@@ -260,7 +260,7 @@ void AND_8(uint8_t *r1, uint8_t *r2, flags *f)
     *r1 = res;
 }
 
-void XOR_8(uint8_t *r1, uint8_t *r2, flags *f)
+void XOR_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 ^ *r2;
     f->z = res == 0x00;
@@ -270,7 +270,7 @@ void XOR_8(uint8_t *r1, uint8_t *r2, flags *f)
     *r1 = res;
 }
 
-void OR_8(uint8_t *r1, uint8_t *r2, flags *f)
+void OR_8(uint8_t *r1, uint8_t *r2, cpuflags_t *f)
 {
     uint8_t res = *r1 | *r2;
     f->z = res == 0x00;
@@ -285,7 +285,7 @@ void OR_8(uint8_t *r1, uint8_t *r2, flags *f)
  *  Conditional jump
  *
  =================================*/
-void JP(uint16_t *PC, uint16_t imm, uint8_t mask, flags *f)
+void JP(uint16_t *PC, uint16_t imm, uint8_t mask, cpuflags_t *f)
 {
     if(~mask | *((uint8_t*)f)){
         *PC = imm;
@@ -297,7 +297,7 @@ void JP(uint16_t *PC, uint16_t imm, uint8_t mask, flags *f)
  *  Conditional call
  *
  =================================*/
-void CALL(uint16_t *PC, uint16_t *SP, uint16_t *stack, uint16_t imm, uint8_t mask, flags *f)
+void CALL(uint16_t *PC, uint16_t *SP, uint16_t *stack, uint16_t imm, uint8_t mask, cpuflags_t *f)
 {
     if(~mask | *((uint8_t*)f)){
         *SP = *SP - 2;
@@ -319,7 +319,7 @@ void RST(uint16_t *PC, uint16_t *SP, uint16_t *stack, uint16_t imm)
  *
  * NOTE - mask[0:3] unused
  =================================*/
-void JR(uint16_t *PC, uint8_t imm, uint8_t mask, flags *f)
+void JR(uint16_t *PC, uint8_t imm, uint8_t mask, cpuflags_t *f)
 {
     if(~mask | *((uint8_t*)f)){
         *PC = *PC + (int8_t)imm;
@@ -332,7 +332,7 @@ void JR(uint16_t *PC, uint8_t imm, uint8_t mask, flags *f)
  *
  * NOTE - mask[0:3] unused
  =================================*/
-void RET(uint16_t *PC, uint16_t *SP, uint8_t mask, flags *f)
+void RET(uint16_t *PC, uint16_t *SP, uint8_t mask, cpuflags_t *f)
 {
     if(~mask | *((uint8_t*)f)){
         *PC = *SP;
@@ -352,9 +352,9 @@ void RETI(uint16_t *PC, uint16_t *SP, uint8_t *IME)
  *  BCD Decimal Adjust
  *  Retroactively converts previous
  *  ADD/SUB op into BCD ADD/SUB
- *  using N, H, C flags
+ *  using N, H, C cpuflags_t
  *================================*/
-void DAA(uint8_t *reg, flags *f)
+void DAA(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg;
     if(f->n){
@@ -381,7 +381,7 @@ void DAA(uint8_t *reg, flags *f)
  * SCF:
  *  set carry flag
  =================================*/
-void SCF(flags *f)
+void SCF(cpuflags_t *f)
 {
     f->c = 1;
     f->h = 0;
@@ -392,7 +392,7 @@ void SCF(flags *f)
  CCF:
  *  flip carry flag
  =================================*/
-void CCF(flags *f)
+void CCF(cpuflags_t *f)
 {
     f->c = ~(f->c);
     f->h = 0;
@@ -403,7 +403,7 @@ void CCF(flags *f)
  * RLC:
  *  Rotate Left
  =================================*/
-void RLC_8(uint8_t *reg, flags *f)
+void RLC_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg << 1 | *reg >> 7;
     f->c = *reg >> 7;
@@ -417,7 +417,7 @@ void RLC_8(uint8_t *reg, flags *f)
  * RL:
  *  Rotate Left through carry
  =================================*/
-void RL_8(uint8_t *reg, flags *f)
+void RL_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg << 1 | f->c;
     f->c = *reg >> 7;
@@ -431,7 +431,7 @@ void RL_8(uint8_t *reg, flags *f)
  * RRC:
  *  Rotate Right
  =================================*/
-void RRC_8(uint8_t *reg, flags *f)
+void RRC_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg >> 1 | *reg << 7;
     f->c = *reg & 0x1;
@@ -445,7 +445,7 @@ void RRC_8(uint8_t *reg, flags *f)
  * RR:
  *  Rotate Right through carry
  =================================*/
-void RR_8(uint8_t *reg, flags *f)
+void RR_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg >> 1 | f->c << 7;
     f->c = *reg & 0x1;
@@ -459,7 +459,7 @@ void RR_8(uint8_t *reg, flags *f)
  * SLA:
  *  Shift left arithmetic 
  =================================*/
-void SLA_8(uint8_t *reg, flags *f)
+void SLA_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = *reg << 1;
     f->c = *reg >> 7;
@@ -473,7 +473,7 @@ void SLA_8(uint8_t *reg, flags *f)
  * SRA:
  *  Shift right arithmetic 
  =================================*/
-void SRA_8(uint8_t *reg, flags *f)
+void SRA_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = (*reg >> 1) | *reg & 0x80;
     f->c = 0;
@@ -487,7 +487,7 @@ void SRA_8(uint8_t *reg, flags *f)
  * SRL:
  *  Shift right logical 
  =================================*/
-void SRL_8(uint8_t *reg, flags *f)
+void SRL_8(uint8_t *reg, cpuflags_t *f)
 {
     uint8_t res = (*reg >> 1);
     f->c = *reg >> 7;
@@ -501,7 +501,7 @@ void SRL_8(uint8_t *reg, flags *f)
  * SWAP:
  *  Swap low and high nibbles 
  =================================*/
-void SWAP_8(uint8_t *reg, flags *f){
+void SWAP_8(uint8_t *reg, cpuflags_t *f){
     uint8_t res = (*reg << 4) | (*reg >> 4);
     f->c = 0;
     f->n = 0;
@@ -514,7 +514,7 @@ void SWAP_8(uint8_t *reg, flags *f){
  * BIT:
  *  Test bit n 
  =================================*/
-void BIT(uint8_t *reg, uint8_t bit, flags *f)
+void BIT(uint8_t *reg, uint8_t bit, cpuflags_t *f)
 {
     uint8_t res = (*reg >> bit) & 0x1;
     f->n = 0;

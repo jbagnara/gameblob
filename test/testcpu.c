@@ -20,10 +20,6 @@ machine m;
 
 void reset()
 {
-    m.cpu.IME = 0x0;
-    m.cpu.IF = 0xe0;
-    m.cpu.IE = 0x00;
-
     // reset cpu
     m.cpu.AF = 0x0000;
     m.cpu.BC = 0x0000;
@@ -66,7 +62,7 @@ void reset()
 int check()
 {
     printf("\033[0;31m");
-    regs r = m.cpu;
+    cpu_t r = m.cpu;
 	if(e_A != r.A){
 		printf("incorrect A reg in case 0x%.2x\n", test_case);
         printf(" - expected 0x%.2x, got 0x%.2x\n", e_A, r.A); 
